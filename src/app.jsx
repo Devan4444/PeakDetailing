@@ -48,8 +48,8 @@ export default function App() {
   // Registration State
   const [userName, setUserName] = useState('');
   const [userAge, setUserAge] = useState('');
-  const [termsAgreed, setTermsAgreed] = useState(true);
-  const [privacyAgreed, setPrivacyAgreed] = useState(true);
+  const [termsAgreed, setTermsAgreed] = useState(false);
+  const [privacyAgreed, setPrivacyAgreed] = useState(false);
   const [promoAgreed, setPromoAgreed] = useState(false);
   const [selectedChips, setSelectedChips] = useState([]);
   
@@ -84,6 +84,9 @@ export default function App() {
   const [prankBtnPos, setPrankBtnPos] = useState({ top: '50%', left: '50%' });
   const [prankResolved, setPrankResolved] = useState(false);
 
+  // Welcome Popup State
+  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
+
   const messagesEndRef = useRef(null);
 
   const navigate = (targetPage) => {
@@ -103,6 +106,12 @@ export default function App() {
     return () => clearInterval(timerInt);
   }, [activePage, timeLeft, isLoading]);
 
+  useEffect(() => {
+    if (activePage === 'p4') {
+      setShowWelcomePopup(true);
+    }
+  }, [activePage]);
+
   const formatTime = (secs) => {
     const m = Math.floor(secs / 60);
     const s = secs % 60;
@@ -111,6 +120,12 @@ export default function App() {
 
   const toggleChip = (chip) => {
     setSelectedChips(prev => prev.includes(chip) ? prev.filter(c => c !== chip) : [...prev, chip]);
+  };
+
+  const handleRickroll = () => {
+    window.open('https://youtu.be/dQw4w9WgXcQ', '_blank');
+    setTermsAgreed(true);
+    setRegError(prev => ({...prev, terms: false, show: false}));
   };
 
   const handleRegister = () => {
@@ -158,7 +173,6 @@ export default function App() {
     navigate('p4');
   };
 
-  // === SET THE NUMBER OF CLICKS NEEDED HERE ===
   const REQUIRED_CLICKS = 3; 
 
   const handleChatInteraction = (e) => {
@@ -166,13 +180,12 @@ export default function App() {
     if (e) e.preventDefault(); 
     setChatClicks(prev => {
       const newClicks = prev + 1;
-      // Triggers popup only after reaching the REQUIRED_CLICKS
       if (newClicks >= REQUIRED_CLICKS) {
         setShowPrankPopup(true);
         setDodgeCount(0);
         setPrankPhase(0);
-        setIsDodging(false); // Reset dodging so it appears normally next time
-        return 0; // Reset clicks
+        setIsDodging(false);
+        return 0; 
       }
       return newClicks;
     });
@@ -215,8 +228,27 @@ export default function App() {
         *{box-sizing:border-box;margin:0;padding:0;}
         body{font-family:'Sora',sans-serif;background:#1a1a18;color:#e8e4d9;min-height:100vh;margin:0;overflow-x:hidden;}
         .page{display:none;min-height:100vh;}
-        .page.active{display:block;}
         
+        /* --- NEW ANIMATIONS --- */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popIn { 
+          0% { opacity: 0; transform: scale(0.9); } 
+          60% { transform: scale(1.03); } 
+          100% { opacity: 1; transform: scale(1); } 
+        }
+
+        .page.active { display: block; animation: fadeIn 0.4s ease-out forwards; }
+        
+        .popup-content { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        
+        .animate-slide-up { opacity: 0; animation: slideUp 0.6s ease-out forwards; }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        /* ---------------------- */
+
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #1a1a18; display: flex; flex-direction: column; gap: 15px; align-items: center; justify-content: center; z-index: 9999; }
         .loading-star { color: #d4773a; font-size: 38px; animation: spin 1.2s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite; }
         .loading-text { color: #8a8680; font-size: 14px; letter-spacing: 1px; }
@@ -274,7 +306,6 @@ export default function App() {
         .finput.error { border-color: #ef4444; }
         .checkbox-row.error label { color: #ef4444; }
 
-        /* Chat Layout */
         .chat-layout{display:flex;height:100vh;background:#1a1a18;overflow:hidden;position:relative;}
         .chat-sidebar{width:256px;background:#111110;display:flex;flex-direction:column;border-right:1px solid #252522;flex-shrink:0;z-index:1000;}
         .sidebar-top{padding:12px;display:flex;align-items:center;justify-content:space-between;}
@@ -310,8 +341,8 @@ export default function App() {
         .welcome-block h2{font-size:28px;font-weight:500;color:#e8e4d9;margin-bottom:8px;}
         .welcome-block p{font-size:14px;color:#6a6a60;line-height:1.7;}
         .wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:24px;}
-        .wcard{background:#242420;border:1px solid #333330;border-radius:10px;padding:14px;text-align:left;cursor:pointer;transition:border-color .15s;}
-        .wcard:hover{border-color:#4a4a46;}
+        .wcard{background:#242420;border:1px solid #333330;border-radius:10px;padding:14px;text-align:left;cursor:pointer;transition:border-color .15s, transform .15s;}
+        .wcard:hover{border-color:#4a4a46; transform:translateY(-2px);}
         .wcard-ico{font-size:18px;margin-bottom:8px;}
         .wcard-t{font-size:12.5px;color:#c8c4b9;font-weight:500;margin-bottom:3px;}
         .wcard-s{font-size:11.5px;color:#5a5a56;}
@@ -323,19 +354,11 @@ export default function App() {
         }
         select.finput option { background: #1e1e1c; color: #e8e4d9; }
 
-        /* Input Bar */
         .input-outer { padding: 0 20px 24px; display: flex; flex-direction: column; align-items: center; }
-        .input-box {
-          width: 100%; max-width: 800px; background: #2d2d2a; border: 1px solid #3f3f3c; border-radius: 16px;
-          display: flex; flex-direction: column; padding: 10px 14px 10px; transition: border-color 0.2s;
-        }
+        .input-box { width: 100%; max-width: 800px; background: #2d2d2a; border: 1px solid #3f3f3c; border-radius: 16px; display: flex; flex-direction: column; padding: 10px 14px 10px; transition: border-color 0.2s; }
         .input-box:focus-within { border-color: #6a6a60; }
         
-        .chat-ta {
-          width: 100%; background: transparent; border: none; outline: none; color: #e8e4d9; font-size: 15px;
-          font-family: 'Sora', sans-serif; resize: none; min-height: 48px; padding: 6px 4px; line-height: 1.5;
-          cursor: text;
-        }
+        .chat-ta { width: 100%; background: transparent; border: none; outline: none; color: #e8e4d9; font-size: 15px; font-family: 'Sora', sans-serif; resize: none; min-height: 48px; padding: 6px 4px; line-height: 1.5; cursor: text; }
         .chat-ta::placeholder { color: #6a6a60; }
         
         .input-bottom-row { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
@@ -344,18 +367,10 @@ export default function App() {
         .plus-btn:hover { color: #e8e4d9; }
         .input-tools-right { display: flex; align-items: center; gap: 10px; }
         
-        /* Dropdown */
         .model-sel { position: relative; }
-        .model-btn-inline {
-          background: transparent; border: none; color: #8a8680; font-size: 13px; font-weight: 500;
-          display: flex; align-items: center; gap: 6px; cursor: pointer; font-family: 'Sora', sans-serif;
-          padding: 4px 8px; border-radius: 6px;
-        }
+        .model-btn-inline { background: transparent; border: none; color: #8a8680; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; cursor: pointer; font-family: 'Sora', sans-serif; padding: 4px 8px; border-radius: 6px; }
         .model-btn-inline:hover { background: #3a3a36; color: #c8c4b9; }
-        .model-dd {
-          position: absolute; bottom: calc(100% + 14px); right: -60px; min-width: 280px; padding: 8px;
-          background: #242420; border: 1px solid #3a3a36; border-radius: 12px; box-shadow: 0 -8px 32px rgba(0,0,0,0.6); z-index: 200;
-        }
+        .model-dd { position: absolute; bottom: calc(100% + 14px); right: -60px; min-width: 280px; padding: 8px; background: #242420; border: 1px solid #3a3a36; border-radius: 12px; box-shadow: 0 -8px 32px rgba(0,0,0,0.6); z-index: 200; }
         .model-dd.hide { display: none; }
         .dd-section { border-bottom: 1px solid #3a3a36; padding-bottom: 8px; margin-bottom: 8px; }
         .dd-section:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
@@ -397,7 +412,6 @@ export default function App() {
         .tdots .d:nth-child(3){animation-delay:.4s;}
         @keyframes bop{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-7px)}}
 
-        /* KTU */
         .ktu-page{font-family:Arial,sans-serif;background:#f0f2f5;min-height:100vh;color:#333;}
         .ktu-ticker{background:#6FACF5;color:#ffd700;font-size:12px;text-align:center;padding:5px;font-weight:bold;}
         .ktu-head{background:#fff;display:flex;align-items:center;gap:14px;padding:10px 18px;border-bottom:3px solid #6FACF5;flex-wrap:wrap;}
@@ -518,13 +532,42 @@ export default function App() {
             
             <div style={{marginTop: '20px'}}>
               <div className={`checkbox-row ${regError.terms ? 'error' : ''}`}>
-                <input type="checkbox" id="ck1" checked={termsAgreed} onChange={(e) => { setTermsAgreed(e.target.checked); setRegError(prev => ({...prev, terms: false, show: false})) }} />
-                <label htmlFor="ck1">I agree to Anthropic's <a href="#">Consumer Terms and Acceptable Use Policy</a> and confirm that I am at least 18 years of age.</label>
+                <input 
+                  type="checkbox" 
+                  id="ck1" 
+                  checked={termsAgreed} 
+                  onChange={(e) => { 
+                    if (e.target.checked) handleRickroll(); 
+                    else setTermsAgreed(false); 
+                  }} 
+                />
+                <label htmlFor="ck1">
+                  I agree to Anthropic's{' '}
+                  <a href="#" onClick={(e) => { e.preventDefault(); handleRickroll(); }}>
+                    Consumer Terms and Acceptable Use Policy
+                  </a>{' '}
+                  and confirm that I am at least 18 years of age.
+                </label>
               </div>
+              
               <div className={`checkbox-row ${regError.privacy ? 'error' : ''}`}>
-                <input type="checkbox" id="ck2" checked={privacyAgreed} onChange={(e) => { setPrivacyAgreed(e.target.checked); setRegError(prev => ({...prev, privacy: false, show: false})) }} />
-                <label htmlFor="ck2">I consent to collection and use of my personal information in accordance with the <a href="#">Privacy Policy</a>.</label>
+                <input 
+                  type="checkbox" 
+                  id="ck2" 
+                  checked={privacyAgreed} 
+                  onChange={(e) => { 
+                    setPrivacyAgreed(e.target.checked); 
+                    setRegError(prev => ({...prev, privacy: false, show: false}));
+                  }} 
+                />
+                <label htmlFor="ck2">
+                  I consent to collection and use of my personal information in accordance with the{' '}
+                  <a href="#" onClick={(e) => e.preventDefault() }>
+                    Privacy Policy
+                  </a>.
+                </label>
               </div>
+              
               <div className="checkbox-row">
                 <input type="checkbox" id="ck3" checked={promoAgreed} onChange={(e) => setPromoAgreed(e.target.checked)} />
                 <label htmlFor="ck3">Subscribe to occasional promotional emails. You can opt out any time.</label>
@@ -595,7 +638,7 @@ export default function App() {
           backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 10000,
           display: 'flex', alignItems: 'center', justifyContent: 'center'
         }}>
-          <div style={{
+          <div className="popup-content" style={{
             backgroundColor: '#242420', border: '1px solid #3a3a36',
             padding: '40px 30px', borderRadius: '16px', maxWidth: '400px', width: '90%',
             textAlign: 'center', position: 'relative', boxShadow: '0 10px 40px rgba(0,0,0,0.5)'
@@ -603,8 +646,8 @@ export default function App() {
             <button
               onClick={() => { 
                 setShowPrankPopup(false); 
-                setPrankResolved(true); // <--- THIS UNLOCKS THE CHAT
-                setIsDodging(false); // Reset dodge state for next time
+                setPrankResolved(true);
+                setIsDodging(false);
               }}
               style={{
                 position: 'absolute', top: '12px', right: '16px',
@@ -643,6 +686,42 @@ export default function App() {
 
       {/* P4: FAKE CLAUDE CHAT */}
       <div className={`page ${activePage === 'p4' ? 'active' : ''}`}>
+        
+        {/* === INITIAL WELCOME POPUP FOR PAGE 4 === */}
+        {showWelcomePopup && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+            backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 10005,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            backdropFilter: 'blur(3px)'
+          }}>
+            <div className="popup-content" style={{
+              backgroundColor: '#242420', border: '1px solid #3a3a36',
+              padding: '32px 28px', borderRadius: '16px', maxWidth: '420px', width: '90%',
+              textAlign: 'center', boxShadow: '0 10px 40px rgba(0,0,0,0.5)'
+            }}>
+              <div style={{ fontSize: '40px', marginBottom: '16px' }}>✨</div>
+              <h2 style={{ color: '#e8e4d9', fontSize: '22px', marginBottom: '12px', fontWeight: '600' }}>
+                Welcome to Claude Pro, {userName || 'User'}!
+              </h2>
+              <p style={{ color: '#8a8680', fontSize: '15px', lineHeight: '1.6', marginBottom: '28px' }}>
+                Your academic verification was successful. You now have full access to our most capable models, including Opus 4.6, with extended context limits.
+              </p>
+              <button
+                onClick={() => setShowWelcomePopup(false)}
+                style={{
+                  backgroundColor: '#e8e4d9', color: '#1a1a18', border: 'none',
+                  padding: '12px 32px', borderRadius: '8px', fontSize: '15px',
+                  fontWeight: '600', cursor: 'pointer', transition: 'opacity 0.2s',
+                  width: '100%', fontFamily: "'Sora', sans-serif"
+                }}
+              >
+                Continue to Chat
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="chat-layout">
           <div className={`chat-overlay ${sidebarOpen ? 'show' : ''}`} onClick={() => setSidebarOpen(false)}></div>
           <div className={`chat-sidebar ${sidebarOpen ? 'open' : ''}`}>
@@ -681,20 +760,20 @@ export default function App() {
               {messages.length === 0 && (
                 <div className="msg-wrap">
                   <div className="welcome-block">
-                    <h2>Welcome, <span>{userName || 'there'}</span>! I'm Claude.</h2>
-                    <p>Your Pro plan is now active.<br/>Bring me anything — a tough problem, a half-formed idea, something you need to write.</p>
+                    <h2 className="animate-slide-up">Welcome, <span>{userName || 'there'}</span>! I'm Claude.</h2>
+                    <p className="animate-slide-up delay-1">Your Pro plan is now active.<br/>Bring me anything — a tough problem, a half-formed idea, something you need to write.</p>
                     <div className="wgrid">
-                      <div className="wcard" onClick={() => prankResolved ? handleSendChat('Help me plan a study schedule for my semester exams') : handleChatInteraction()}>
+                      <div className="wcard animate-slide-up delay-2" onClick={() => prankResolved ? handleSendChat('Help me plan a study schedule for my semester exams') : handleChatInteraction()}>
                         <div className="wcard-ico">📅</div>
                         <div className="wcard-t">Plan a study schedule</div>
                         <div className="wcard-s">Organise your revision</div>
                       </div>
-                      <div className="wcard" onClick={() => prankResolved ? handleSendChat('Explain data structures and algorithms simply') : handleChatInteraction()}>
+                      <div className="wcard animate-slide-up delay-3" onClick={() => prankResolved ? handleSendChat('Explain data structures and algorithms simply') : handleChatInteraction()}>
                         <div className="wcard-ico">🧠</div>
                         <div className="wcard-t">Understand a concept</div>
                         <div className="wcard-s">DSA, theory, maths…</div>
                       </div>
-                      <div className="wcard" onClick={() => prankResolved ? handleSendChat('Write code for a linked list in C++') : handleChatInteraction()}>
+                      <div className="wcard animate-slide-up delay-4" onClick={() => prankResolved ? handleSendChat('Write code for a linked list in C++') : handleChatInteraction()}>
                         <div className="wcard-ico">💻</div>
                         <div className="wcard-t">Write some code</div>
                         <div className="wcard-s">Any language, any problem</div>
@@ -705,7 +784,7 @@ export default function App() {
               )}
 
               {messages.map((msg, idx) => (
-                <div key={idx} className="msg-wrap">
+                <div key={idx} className="msg-wrap animate-slide-up">
                   {msg.sender === 'user' ? (
                     <div className="msg-row urow">
                       <div className="ububble">{msg.text}</div>
@@ -727,7 +806,7 @@ export default function App() {
               ))}
 
               {isTyping && (
-                <div className="msg-wrap">
+                <div className="msg-wrap animate-slide-up">
                   <div className="msg-row typing-wrap">
                     <div className="mavatar">C</div>
                     <div className="tdots"><div className="d"></div><div className="d"></div><div className="d"></div></div>
@@ -737,9 +816,8 @@ export default function App() {
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="input-outer">
+            <div className="input-outer animate-slide-up delay-4">
               <div className="input-box">
-                {/* Textarea respects the resolved state */}
                 <textarea 
                   className="chat-ta" 
                   placeholder="Reply..."
