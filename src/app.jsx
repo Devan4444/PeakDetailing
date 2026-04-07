@@ -216,8 +216,9 @@ export default function App() {
       return newCount;
     });
     
-    const top = Math.random() * 70 + 15; 
-    const left = Math.random() * 70 + 15; 
+    // Calculate a safe area so it doesn't go completely off-screen
+    const top = Math.random() * 80 + 10; 
+    const left = Math.random() * 80 + 10; 
     setPrankBtnPos({ top: `${top}%`, left: `${left}%` });
   };
 
@@ -229,7 +230,7 @@ export default function App() {
         body{font-family:'Sora',sans-serif;background:#1a1a18;color:#e8e4d9;min-height:100vh;margin:0;overflow-x:hidden;}
         .page{display:none;min-height:100vh;}
         
-        /* --- NEW ANIMATIONS --- */
+        /* --- ANIMATIONS --- */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes popIn { 
@@ -664,23 +665,42 @@ export default function App() {
                 : " U dont even know to press button 😑😑"}
             </h2>
             
+            {/* The button stays inside the popup container initially */}
+            {!isDodging && (
+              <button
+                onMouseEnter={dodgePrankButton}
+                onClick={dodgePrankButton}
+                style={{
+                  backgroundColor: '#d4773a', color: '#fff', border: 'none',
+                  padding: '12px 24px', borderRadius: '8px', fontSize: '14px',
+                  fontWeight: '600', cursor: 'pointer'
+                }}
+              >
+                Try again 😑
+              </button>
+            )}
+          </div>
+
+          {/* When dodging starts, the button is rendered OUTSIDE the popup container 
+              but INSIDE the full-screen fixed overlay, allowing it to move anywhere on the screen! */}
+          {isDodging && (
             <button
               onMouseEnter={dodgePrankButton}
               onClick={dodgePrankButton}
               style={{
-                position: isDodging ? 'fixed' : 'relative',
-                top: isDodging ? prankBtnPos.top : 'auto',
-                left: isDodging ? prankBtnPos.left : 'auto',
-                transform: isDodging ? 'translate(-50%, -50%)' : 'none',
+                position: 'absolute',
+                top: prankBtnPos.top,
+                left: prankBtnPos.left,
+                transform: 'translate(-50%, -50%)',
                 backgroundColor: '#d4773a', color: '#fff', border: 'none',
                 padding: '12px 24px', borderRadius: '8px', fontSize: '14px',
                 fontWeight: '600', cursor: 'pointer', transition: 'top 0.2s ease, left 0.2s ease',
                 zIndex: 10001
               }}
             >
-              Try again
+              Try again 😑
             </button>
-          </div>
+          )}
         </div>
       )}
 
